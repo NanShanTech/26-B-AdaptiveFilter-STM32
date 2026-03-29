@@ -12787,12 +12787,20 @@ arm_status arm_sqrt_q15(
 # 34 "../Core/Inc/main.h" 2
 # 53 "../Core/Inc/main.h"
 void Error_Handler(void);
-# 114 "../Core/Inc/main.h"
-  typedef struct {
+# 115 "../Core/Inc/main.h"
+typedef enum {
+    WAVE_SINE = 0,
+    WAVE_SQUARE,
+    WAVE_TRIANGLE,
+    WAVE_UNKNOWN
+} WaveType_t;
+
+
+typedef struct {
     float32_t Freq;
     float32_t Vpp;
-    uint8_t Wave_type;
-  }Wave_Struct;
+    WaveType_t Wave_type;
+} Wave_Struct;
 
   typedef struct {
     uint8_t Freq_flage;

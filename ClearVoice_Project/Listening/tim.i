@@ -12787,12 +12787,20 @@ arm_status arm_sqrt_q15(
 # 34 "../Core/Inc/main.h" 2
 # 53 "../Core/Inc/main.h"
 void Error_Handler(void);
-# 114 "../Core/Inc/main.h"
-  typedef struct {
+# 115 "../Core/Inc/main.h"
+typedef enum {
+    WAVE_SINE = 0,
+    WAVE_SQUARE,
+    WAVE_TRIANGLE,
+    WAVE_UNKNOWN
+} WaveType_t;
+
+
+typedef struct {
     float32_t Freq;
     float32_t Vpp;
-    uint8_t Wave_type;
-  }Wave_Struct;
+    WaveType_t Wave_type;
+} Wave_Struct;
 
   typedef struct {
     uint8_t Freq_flage;
@@ -12806,6 +12814,8 @@ void Error_Handler(void);
 
 
 
+extern TIM_HandleTypeDef htim1;
+
 extern TIM_HandleTypeDef htim2;
 
 extern TIM_HandleTypeDef htim3;
@@ -12814,6 +12824,7 @@ extern TIM_HandleTypeDef htim3;
 
 
 
+void MX_TIM1_Init(void);
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
 
@@ -12825,10 +12836,53 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 
 
+TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 DMA_HandleTypeDef hdma_tim2_up;
 
+
+void MX_TIM1_Init(void)
+{
+
+
+
+
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+
+
+
+  htim1.Instance = ((TIM_TypeDef *) (((0x40000000UL) + 0x00010000UL) + 0x0000UL));
+  htim1.Init.Prescaler = 240-1;
+  htim1.Init.CounterMode = 0x00000000U;
+  htim1.Init.Period = 100-1;
+  htim1.Init.ClockDivision = 0x00000000U;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = (0x1UL << (7U));
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = (0x1UL << (12U));
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = (0x2UL << (4U));
+  sMasterConfig.MasterOutputTrigger2 = 0x00000000U;
+  sMasterConfig.MasterSlaveMode = 0x00000000U;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+
+
+
+}
 
 void MX_TIM2_Init(void)
 {
@@ -12927,7 +12981,18 @@ void MX_TIM3_Init(void)
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
 {
 
-  if(tim_baseHandle->Instance==((TIM_TypeDef *) ((0x40000000UL) + 0x0000UL)))
+  if(tim_baseHandle->Instance==((TIM_TypeDef *) (((0x40000000UL) + 0x00010000UL) + 0x0000UL)))
+  {
+
+
+
+
+    do { volatile uint32_t tmpreg; ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->APB2ENR) |= ((0x1UL << (0U)))); tmpreg = ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->APB2ENR) & ((0x1UL << (0U)))); ((void)(tmpreg)); } while(0);
+
+
+
+  }
+  else if(tim_baseHandle->Instance==((TIM_TypeDef *) ((0x40000000UL) + 0x0000UL)))
   {
 
 
@@ -13001,7 +13066,18 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
 void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 {
 
-  if(tim_baseHandle->Instance==((TIM_TypeDef *) ((0x40000000UL) + 0x0000UL)))
+  if(tim_baseHandle->Instance==((TIM_TypeDef *) (((0x40000000UL) + 0x00010000UL) + 0x0000UL)))
+  {
+
+
+
+
+    (((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->APB2ENR) &= ~ ((0x1UL << (0U)));
+
+
+
+  }
+  else if(tim_baseHandle->Instance==((TIM_TypeDef *) ((0x40000000UL) + 0x0000UL)))
   {
 
 

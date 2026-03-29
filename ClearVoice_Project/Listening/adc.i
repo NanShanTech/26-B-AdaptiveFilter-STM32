@@ -12787,12 +12787,20 @@ arm_status arm_sqrt_q15(
 # 34 "../Core/Inc/main.h" 2
 # 53 "../Core/Inc/main.h"
 void Error_Handler(void);
-# 114 "../Core/Inc/main.h"
-  typedef struct {
+# 115 "../Core/Inc/main.h"
+typedef enum {
+    WAVE_SINE = 0,
+    WAVE_SQUARE,
+    WAVE_TRIANGLE,
+    WAVE_UNKNOWN
+} WaveType_t;
+
+
+typedef struct {
     float32_t Freq;
     float32_t Vpp;
-    uint8_t Wave_type;
-  }Wave_Struct;
+    WaveType_t Wave_type;
+} Wave_Struct;
 
   typedef struct {
     uint8_t Freq_flage;
@@ -12808,11 +12816,14 @@ void Error_Handler(void);
 
 extern ADC_HandleTypeDef hadc1;
 
+extern ADC_HandleTypeDef hadc2;
+
 
 
 
 
 void MX_ADC1_Init(void);
+void MX_ADC2_Init(void);
 # 21 "../Core/Src/adc.c" 2
 
 
@@ -12821,7 +12832,9 @@ void MX_ADC1_Init(void);
 
 
 ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc2;
 DMA_HandleTypeDef hdma_adc1;
+DMA_HandleTypeDef hdma_adc2;
 
 
 void MX_ADC1_Init(void)
@@ -12888,36 +12901,77 @@ void MX_ADC1_Init(void)
 
 }
 
+void MX_ADC2_Init(void)
+{
+
+
+
+
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+
+
+
+
+
+
+  hadc2.Instance = ((ADC_TypeDef *) (((0x40000000UL) + 0x00020000UL) + 0x2100UL));
+  hadc2.Init.ClockPrescaler = ((0x00000000UL));
+  hadc2.Init.Resolution = ((0x00000000UL));
+  hadc2.Init.ScanConvMode = (0x00000000UL);
+  hadc2.Init.EOCSelection = ((0x1UL << (2U)));
+  hadc2.Init.LowPowerAutoWait = DISABLE;
+  hadc2.Init.ContinuousConvMode = DISABLE;
+  hadc2.Init.NbrOfConversion = 1;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.ExternalTrigConv = (((0x08UL << (5U)) | (0x01UL << (5U)) | ((0x1UL << (10U)))));
+  hadc2.Init.ExternalTrigConvEdge = (( (0x1UL << (10U))));
+  hadc2.Init.ConversionDataManagement = ((uint32_t)((0x1UL << (0U)) | (0x2UL << (0U))));
+  hadc2.Init.Overrun = ((0x00000000UL));
+  hadc2.Init.LeftBitShift = ((0x00000000UL));
+  hadc2.Init.OversamplingMode = DISABLE;
+  hadc2.Init.Oversampling.Ratio = 1;
+  if (HAL_ADC_Init(&hadc2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+
+
+  sConfig.Channel = ((( (0x04UL << (26U)) | (0x02UL << (26U)) | (0x01UL << (26U))) | ((0x00000000UL) | ((21UL) << (20UL))) | ((0x00080UL << (0U))) ));
+  sConfig.Rank = (((0x00000000UL) | ( 6UL)));
+  sConfig.SamplingTime = ((0x00000000UL));
+  sConfig.SingleDiff = (( (0x7FFUL << (0U))));
+  sConfig.OffsetNumber = (((0x00000003UL)) + 1U);
+  sConfig.Offset = 0;
+  sConfig.OffsetSignedSaturation = DISABLE;
+  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+
+
+
+}
+
+static uint32_t HAL_RCC_ADC12_CLK_ENABLED=0;
+
 void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
   if(adcHandle->Instance==((ADC_TypeDef *) (((0x40000000UL) + 0x00020000UL) + 0x2000UL)))
   {
 
 
 
 
-
-
-    PeriphClkInitStruct.PeriphClockSelection = ((uint64_t)(0x00080000U));
-    PeriphClkInitStruct.PLL2.PLL2M = 2;
-    PeriphClkInitStruct.PLL2.PLL2N = 12;
-    PeriphClkInitStruct.PLL2.PLL2P = 2;
-    PeriphClkInitStruct.PLL2.PLL2Q = 2;
-    PeriphClkInitStruct.PLL2.PLL2R = 2;
-    PeriphClkInitStruct.PLL2.PLL2RGE = (0x3UL << (6U));
-    PeriphClkInitStruct.PLL2.PLL2VCOSEL = (0x1UL << (5U));
-    PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
-    PeriphClkInitStruct.AdcClockSelection = (0x00000000U);
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-    {
-      Error_Handler();
+    HAL_RCC_ADC12_CLK_ENABLED++;
+    if(HAL_RCC_ADC12_CLK_ENABLED==1){
+      do { volatile uint32_t tmpreg; ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR) |= ((0x1UL << (5U)))); tmpreg = ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR) & ((0x1UL << (5U)))); ((void)(tmpreg)); } while(0);
     }
-
-
-    do { volatile uint32_t tmpreg; ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR) |= ((0x1UL << (5U)))); tmpreg = ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR) & ((0x1UL << (5U)))); ((void)(tmpreg)); } while(0);
 
     do { volatile uint32_t tmpreg; ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB4ENR) |= ((0x1UL << (0U)))); tmpreg = ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB4ENR) & ((0x1UL << (0U)))); ((void)(tmpreg)); } while(0);
 
@@ -12951,6 +13005,49 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
 
 
   }
+  else if(adcHandle->Instance==((ADC_TypeDef *) (((0x40000000UL) + 0x00020000UL) + 0x2100UL)))
+  {
+
+
+
+
+    HAL_RCC_ADC12_CLK_ENABLED++;
+    if(HAL_RCC_ADC12_CLK_ENABLED==1){
+      do { volatile uint32_t tmpreg; ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR) |= ((0x1UL << (5U)))); tmpreg = ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR) & ((0x1UL << (5U)))); ((void)(tmpreg)); } while(0);
+    }
+
+    do { volatile uint32_t tmpreg; ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB4ENR) |= ((0x1UL << (0U)))); tmpreg = ((((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB4ENR) & ((0x1UL << (0U)))); ((void)(tmpreg)); } while(0);
+
+
+
+    GPIO_InitStruct.Pin = ((uint16_t)0x0080);
+    GPIO_InitStruct.Mode = (0x3uL << 0u);
+    GPIO_InitStruct.Pull = (0x00000000U);
+    HAL_GPIO_Init(((GPIO_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x0000UL)), &GPIO_InitStruct);
+
+
+
+    hdma_adc2.Instance = ((DMA_Stream_TypeDef *) ((((0x40000000UL) + 0x00020000UL) + 0x0000UL) + 0x040UL));
+    hdma_adc2.Init.Request = 10U;
+    hdma_adc2.Init.Direction = ((uint32_t)0x00000000U);
+    hdma_adc2.Init.PeriphInc = ((uint32_t)0x00000000U);
+    hdma_adc2.Init.MemInc = ((uint32_t)(0x1UL << (10U)));
+    hdma_adc2.Init.PeriphDataAlignment = ((uint32_t)(0x1UL << (11U)));
+    hdma_adc2.Init.MemDataAlignment = ((uint32_t)(0x1UL << (13U)));
+    hdma_adc2.Init.Mode = ((uint32_t)(0x1UL << (8U)));
+    hdma_adc2.Init.Priority = ((uint32_t)0x00000000U);
+    hdma_adc2.Init.FIFOMode = ((uint32_t)0x00000000U);
+    if (HAL_DMA_Init(&hdma_adc2) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    do{ (adcHandle)->DMA_Handle = &(hdma_adc2); (hdma_adc2).Parent = (adcHandle); } while(0);
+
+
+
+
+  }
 }
 
 void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
@@ -12962,12 +13059,37 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
 
 
-    (((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR &= ~ ((0x1UL << (5U))));
+    HAL_RCC_ADC12_CLK_ENABLED--;
+    if(HAL_RCC_ADC12_CLK_ENABLED==0){
+      (((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR &= ~ ((0x1UL << (5U))));
+    }
 
 
 
 
     HAL_GPIO_DeInit(((GPIO_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x0000UL)), ((uint16_t)0x0040));
+
+
+    HAL_DMA_DeInit(adcHandle->DMA_Handle);
+
+
+
+  }
+  else if(adcHandle->Instance==((ADC_TypeDef *) (((0x40000000UL) + 0x00020000UL) + 0x2100UL)))
+  {
+
+
+
+
+    HAL_RCC_ADC12_CLK_ENABLED--;
+    if(HAL_RCC_ADC12_CLK_ENABLED==0){
+      (((RCC_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x4400UL))->AHB1ENR &= ~ ((0x1UL << (5U))));
+    }
+
+
+
+
+    HAL_GPIO_DeInit(((GPIO_TypeDef *) (((0x40000000UL) + 0x18020000UL) + 0x0000UL)), ((uint16_t)0x0080));
 
 
     HAL_DMA_DeInit(adcHandle->DMA_Handle);

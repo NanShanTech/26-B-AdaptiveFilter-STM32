@@ -12787,12 +12787,20 @@ arm_status arm_sqrt_q15(
 # 34 "../Core/Inc\\main.h" 2
 # 53 "../Core/Inc\\main.h"
 void Error_Handler(void);
-# 114 "../Core/Inc\\main.h"
-  typedef struct {
+# 115 "../Core/Inc\\main.h"
+typedef enum {
+    WAVE_SINE = 0,
+    WAVE_SQUARE,
+    WAVE_TRIANGLE,
+    WAVE_UNKNOWN
+} WaveType_t;
+
+
+typedef struct {
     float32_t Freq;
     float32_t Vpp;
-    uint8_t Wave_type;
-  }Wave_Struct;
+    WaveType_t Wave_type;
+} Wave_Struct;
 
   typedef struct {
     uint8_t Freq_flage;
@@ -12808,6 +12816,8 @@ void MX_GPIO_Init(void);
 
 # 1 "../Core/Inc\\tim.h" 1
 # 35 "../Core/Inc\\tim.h"
+extern TIM_HandleTypeDef htim1;
+
 extern TIM_HandleTypeDef htim2;
 
 extern TIM_HandleTypeDef htim3;
@@ -12816,6 +12826,7 @@ extern TIM_HandleTypeDef htim3;
 
 
 
+void MX_TIM1_Init(void);
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
 

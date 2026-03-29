@@ -53,28 +53,26 @@ char aRxBuffer[RXBUFFERSIZE];
 uint16_t RX_len;
 
 uint8_t adc_dma_finish;//dma完成中断标志
+
 __attribute__((section (".AXI_SRAM")))  uint16_t adc1_buffer[FFT_N] ;//混合信号
-__attribute__((section (".AXI_SRAM")))  uint16_t adc2_buffer[FFT_N] ;//干扰信号
+
+__attribute__((section (".AXI_SRAM")))  uint16_t adc2_buffer[256] ;//干扰信号
+
 __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Mix;//
-__attribute__((section (".AXI_SRAM"))) fftin FFTIN_Dist;//
+
 __attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Mix;//
-__attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Dist;//
+
 max_3_index Top3_Mix;//
-max_3_index Top3_Dist;//
 
-Wave_Struct Wave_Info = 
-{
-	.Freq = 0,//频率
-	.Vpp = 0,//峰峰值
-	.Wave_type = 0,//波形类别
-};//有用信号的信息
-
+Wave_Struct Wave_origin;
+Wave_Struct Wave_noise;
 SystemState_t g_SystemState;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
 
@@ -90,18 +88,23 @@ void App_process(void)
     }
     adc_dma_finish = 0;
 
-    FFT_Task(&Wave_Info); //FFT任务，可以获取频谱    
+    FFT_Task(&Wave_origin,&Wave_noise); //FFT任务
 		
-    Send_Wave(&Wave_Info);//AD9910重建原始信号
-    USART_Task(&Wave_Info);//串口发送所有需要显示的内容
+		Calc_Noice_Energy(&Wave_noise);//计算干扰信号的能量（峰峰值）
+		
+    Send_Wave(&Wave_origin);//AD9910重建原始信号
+		
+    USART_Task(&Wave_origin,&Wave_noise);//串口发送所有需要显示的内容
 
     if (g_SystemState == SYS_STATE_SINGLE_SHOT) {
         HMI_send_string("tm0.en","1");//关闭串口屏定时器
         g_SystemState = SYS_STATE_IDLE;//单次滤波，重新进入空闲模式
     } 
+		
     else if (g_SystemState == SYS_STATE_CONTINUOUS) {
         Start_ADC_DMA();//连续滤波 重新开启ADC dma
     }
+		
 }
 
 /* USER CODE END 0 */
@@ -140,6 +143,9 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  /* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -151,9 +157,13 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM2_Init();
   MX_USART3_UART_Init();
+  MX_ADC2_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
    HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)aRxBuffer, RXBUFFERSIZE);
 	 Init_AD9910();
+	  HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adc2_buffer, 256);
+    HAL_TIM_Base_Start(&htim1);//开启对于干扰信号的采样
 	 AD9910_FreWrite(300);//原始信号300hz
 	 AD9910_AmpWrite(10000);
 	 HMI_Init();
@@ -229,6 +239,32 @@ void SystemClock_Config(void)
   }
 }
 
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInitStruct.PLL2.PLL2M = 2;
+  PeriphClkInitStruct.PLL2.PLL2N = 12;
+  PeriphClkInitStruct.PLL2.PLL2P = 2;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 2;
+  PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOMEDIUM;
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
+  PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
 /* USER CODE BEGIN 4 */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)//adc_dma中断回调
 {
@@ -266,7 +302,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)aRxBuffer, RXBUFFERSIZE);
     }
 }
-/* USER CODE END 4 */
 /* USER CODE END 4 */
 
  /* MPU Configuration */

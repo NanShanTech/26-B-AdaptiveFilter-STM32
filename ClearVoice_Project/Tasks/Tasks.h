@@ -14,21 +14,23 @@ typedef enum {
 
 extern uint8_t adc_dma_finish;//dma完成中断标志
 extern __attribute__((section (".AXI_SRAM")))  uint16_t adc1_buffer[FFT_N] ;//混合信号
-extern __attribute__((section (".AXI_SRAM")))  uint16_t adc2_buffer[FFT_N] ;//干扰信号
+
+extern __attribute__((section (".AXI_SRAM")))  uint16_t adc2_buffer[256] ;//干扰信号
+
 extern __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Mix;//
-extern __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Dist;//
+
 extern __attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Mix;//
-extern __attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Dist;//
 
 extern max_3_index Top3_Mix;//
-extern max_3_index Top3_Dist;//
-extern Wave_Struct Wave_Info;
+
+extern Wave_Struct Wave_origin;
+extern Wave_Struct Wave_noise;
 extern SystemState_t g_SystemState;//系统状态机
 
 void Start_ADC_DMA(void);
 void Stop_ADC_DMA(void);
-void FFT_Task(Wave_Struct* P_Wave);
+void FFT_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 void Send_Wave(Wave_Struct* P_Wave);
-void USART_Task(Wave_Struct* P_Wave);
+void USART_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 
 #endif // __TASKS_H

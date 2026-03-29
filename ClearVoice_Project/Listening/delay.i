@@ -12792,12 +12792,20 @@ arm_status arm_sqrt_q15(
 # 34 "../Core/Inc\\main.h" 2
 # 53 "../Core/Inc\\main.h"
 void Error_Handler(void);
-# 114 "../Core/Inc\\main.h"
-  typedef struct {
+# 115 "../Core/Inc\\main.h"
+typedef enum {
+    WAVE_SINE = 0,
+    WAVE_SQUARE,
+    WAVE_TRIANGLE,
+    WAVE_UNKNOWN
+} WaveType_t;
+
+
+typedef struct {
     float32_t Freq;
     float32_t Vpp;
-    uint8_t Wave_type;
-  }Wave_Struct;
+    WaveType_t Wave_type;
+} Wave_Struct;
 
   typedef struct {
     uint8_t Freq_flage;
@@ -13738,15 +13746,20 @@ void MX_USART3_UART_Init(void);
 # 35 "../Core/Inc\\adc.h"
 extern ADC_HandleTypeDef hadc1;
 
+extern ADC_HandleTypeDef hadc2;
+
 
 
 
 
 void MX_ADC1_Init(void);
+void MX_ADC2_Init(void);
 # 20 "../MyDrive/bsp_system.h" 2
 
 # 1 "../Core/Inc\\tim.h" 1
 # 35 "../Core/Inc\\tim.h"
+extern TIM_HandleTypeDef htim1;
+
 extern TIM_HandleTypeDef htim2;
 
 extern TIM_HandleTypeDef htim3;
@@ -13755,6 +13768,7 @@ extern TIM_HandleTypeDef htim3;
 
 
 
+void MX_TIM1_Init(void);
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
 
@@ -14037,22 +14051,24 @@ typedef enum {
 
 extern uint8_t adc_dma_finish;
 extern __attribute__((section (".AXI_SRAM"))) uint16_t adc1_buffer[8192] ;
-extern __attribute__((section (".AXI_SRAM"))) uint16_t adc2_buffer[8192] ;
+
+extern __attribute__((section (".AXI_SRAM"))) uint16_t adc2_buffer[256] ;
+
 extern __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Mix;
-extern __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Dist;
+
 extern __attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Mix;
-extern __attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Dist;
 
 extern max_3_index Top3_Mix;
-extern max_3_index Top3_Dist;
-extern Wave_Struct Wave_Info;
+
+extern Wave_Struct Wave_origin;
+extern Wave_Struct Wave_noise;
 extern SystemState_t g_SystemState;
 
 void Start_ADC_DMA(void);
 void Stop_ADC_DMA(void);
-void FFT_Task(Wave_Struct* P_Wave);
+void FFT_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 void Send_Wave(Wave_Struct* P_Wave);
-void USART_Task(Wave_Struct* P_Wave);
+void USART_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 # 31 "../MyDrive\\bsp_system.h" 2
 
 # 1 "../MyDrive/ad9220.h" 1

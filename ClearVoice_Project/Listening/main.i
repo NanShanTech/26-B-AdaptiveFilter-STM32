@@ -12785,12 +12785,20 @@ arm_status arm_sqrt_q15(
 # 34 "../Core/Inc\\main.h" 2
 # 53 "../Core/Inc\\main.h"
 void Error_Handler(void);
-# 114 "../Core/Inc\\main.h"
-  typedef struct {
+# 115 "../Core/Inc\\main.h"
+typedef enum {
+    WAVE_SINE = 0,
+    WAVE_SQUARE,
+    WAVE_TRIANGLE,
+    WAVE_UNKNOWN
+} WaveType_t;
+
+
+typedef struct {
     float32_t Freq;
     float32_t Vpp;
-    uint8_t Wave_type;
-  }Wave_Struct;
+    WaveType_t Wave_type;
+} Wave_Struct;
 
   typedef struct {
     uint8_t Freq_flage;
@@ -12803,11 +12811,14 @@ void Error_Handler(void);
 # 35 "../Core/Inc\\adc.h"
 extern ADC_HandleTypeDef hadc1;
 
+extern ADC_HandleTypeDef hadc2;
+
 
 
 
 
 void MX_ADC1_Init(void);
+void MX_ADC2_Init(void);
 # 21 "../Core/Src/main.c" 2
 
 # 1 "../Core/Inc\\dma.h" 1
@@ -12817,6 +12828,8 @@ void MX_DMA_Init(void);
 
 # 1 "../Core/Inc\\tim.h" 1
 # 35 "../Core/Inc\\tim.h"
+extern TIM_HandleTypeDef htim1;
+
 extern TIM_HandleTypeDef htim2;
 
 extern TIM_HandleTypeDef htim3;
@@ -12825,6 +12838,7 @@ extern TIM_HandleTypeDef htim3;
 
 
 
+void MX_TIM1_Init(void);
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
 
@@ -14034,22 +14048,24 @@ typedef enum {
 
 extern uint8_t adc_dma_finish;
 extern __attribute__((section (".AXI_SRAM"))) uint16_t adc1_buffer[8192] ;
-extern __attribute__((section (".AXI_SRAM"))) uint16_t adc2_buffer[8192] ;
+
+extern __attribute__((section (".AXI_SRAM"))) uint16_t adc2_buffer[256] ;
+
 extern __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Mix;
-extern __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Dist;
+
 extern __attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Mix;
-extern __attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Dist;
 
 extern max_3_index Top3_Mix;
-extern max_3_index Top3_Dist;
-extern Wave_Struct Wave_Info;
+
+extern Wave_Struct Wave_origin;
+extern Wave_Struct Wave_noise;
 extern SystemState_t g_SystemState;
 
 void Start_ADC_DMA(void);
 void Stop_ADC_DMA(void);
-void FFT_Task(Wave_Struct* P_Wave);
+void FFT_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 void Send_Wave(Wave_Struct* P_Wave);
-void USART_Task(Wave_Struct* P_Wave);
+void USART_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 # 31 "../MyDrive/bsp_system.h" 2
 
 # 1 "../MyDrive/ad9220.h" 1
@@ -14075,28 +14091,26 @@ char aRxBuffer[500];
 uint16_t RX_len;
 
 uint8_t adc_dma_finish;
+
 __attribute__((section (".AXI_SRAM"))) uint16_t adc1_buffer[8192] ;
-__attribute__((section (".AXI_SRAM"))) uint16_t adc2_buffer[8192] ;
+
+__attribute__((section (".AXI_SRAM"))) uint16_t adc2_buffer[256] ;
+
 __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Mix;
-__attribute__((section (".AXI_SRAM"))) fftin FFTIN_Dist;
+
 __attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Mix;
-__attribute__((section (".AXI_SRAM"))) fftdata FFTOUT_Dist;
+
 max_3_index Top3_Mix;
-max_3_index Top3_Dist;
 
-Wave_Struct Wave_Info =
-{
- .Freq = 0,
- .Vpp = 0,
- .Wave_type = 0,
-};
-
+Wave_Struct Wave_origin;
+Wave_Struct Wave_noise;
 SystemState_t g_SystemState;
 
 
 
 
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 static void MPU_Config(void);
 
 
@@ -14112,10 +14126,10 @@ void App_process(void)
     }
     adc_dma_finish = 0;
 
-    FFT_Task(&Wave_Info);
+    FFT_Task(&Wave_origin,&Wave_noise);
 
-    Send_Wave(&Wave_Info);
-    USART_Task(&Wave_Info);
+    Send_Wave(&Wave_origin);
+    USART_Task(&Wave_origin,&Wave_noise);
 
     if (g_SystemState == SYS_STATE_SINGLE_SHOT) {
         HMI_send_string("tm0.en","1");
@@ -14163,6 +14177,9 @@ int main(void)
   SystemClock_Config();
 
 
+  PeriphCommonClock_Config();
+
+
 
 
 
@@ -14173,9 +14190,13 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM2_Init();
   MX_USART3_UART_Init();
+  MX_ADC2_Init();
+  MX_TIM1_Init();
 
    HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)aRxBuffer, 500);
   Init_AD9910();
+   HAL_ADC_Start_DMA(&hadc2, (uint32_t*)adc2_buffer, 256);
+    HAL_TIM_Base_Start(&htim1);
   AD9910_FreWrite(300);
   AD9910_AmpWrite(10000);
   HMI_Init();
@@ -14252,6 +14273,32 @@ void SystemClock_Config(void)
 }
 
 
+
+
+
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+
+
+  PeriphClkInitStruct.PeriphClockSelection = ((uint64_t)(0x00080000U));
+  PeriphClkInitStruct.PLL2.PLL2M = 2;
+  PeriphClkInitStruct.PLL2.PLL2N = 12;
+  PeriphClkInitStruct.PLL2.PLL2P = 2;
+  PeriphClkInitStruct.PLL2.PLL2Q = 2;
+  PeriphClkInitStruct.PLL2.PLL2R = 2;
+  PeriphClkInitStruct.PLL2.PLL2RGE = (0x3UL << (6U));
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = (0x1UL << (5U));
+  PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
+  PeriphClkInitStruct.AdcClockSelection = (0x00000000U);
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
  if (hadc->Instance == ((ADC_TypeDef *) (((0x40000000UL) + 0x00020000UL) + 0x2000UL))) {
@@ -14288,7 +14335,6 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)aRxBuffer, 500);
     }
 }
-
 
 
 
