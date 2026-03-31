@@ -14067,6 +14067,7 @@ extern SystemState_t g_SystemState;
 void Start_ADC_DMA(void);
 void Stop_ADC_DMA(void);
 void FFT_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
+void Calc_Noice_Energy(Wave_Struct* P_Wave);
 void Send_Wave(Wave_Struct* P_Wave);
 void USART_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 # 31 "../MyDrive\\bsp_system.h" 2

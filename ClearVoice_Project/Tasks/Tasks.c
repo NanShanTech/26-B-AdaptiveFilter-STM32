@@ -29,7 +29,7 @@ void FFT_Task(Wave_Struct* Wave_ori,Wave_Struct* noise)
     memset(adc1_buffer, 0, sizeof(adc1_buffer));
 }
 
-void Calc_Interference_Energy(Wave_Struct* P_Wave)
+void Calc_Noice_Energy(Wave_Struct* P_Wave)
 {
     uint32_t sum_adc2 = 0;
     for(int i = 0; i < 256; i++) {

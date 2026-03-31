@@ -14100,13 +14100,18 @@ extern SystemState_t g_SystemState;
 void Start_ADC_DMA(void);
 void Stop_ADC_DMA(void);
 void FFT_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
+void Calc_Noice_Energy(Wave_Struct* P_Wave);
 void Send_Wave(Wave_Struct* P_Wave);
 void USART_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 # 1 "../Tasks/Tasks.c" 2
 
 
 # 1 "../SignalProcess\\FlatTop_Window_8192.h" 1
-# 12 "../SignalProcess\\FlatTop_Window_8192.h"
+
+
+
+
+
 const float32_t FlatTop_Window_8192[8192] = {
     -0.000421051f, -0.000421066f, -0.000421111f, -0.000421187f, -0.000421293f, -0.000421429f, -0.000421595f, -0.000421792f,
     -0.000422018f, -0.000422275f, -0.000422562f, -0.000422880f, -0.000423228f, -0.000423606f, -0.000424014f, -0.000424452f,
@@ -15163,7 +15168,7 @@ void FFT_Task(Wave_Struct* Wave_ori,Wave_Struct* noise)
     memset(adc1_buffer, 0, sizeof(adc1_buffer));
 }
 
-void Calc_Interference_Energy(Wave_Struct* P_Wave)
+void Calc_Noice_Energy(Wave_Struct* P_Wave)
 {
     uint32_t sum_adc2 = 0;
     for(int i = 0; i < 256; i++) {

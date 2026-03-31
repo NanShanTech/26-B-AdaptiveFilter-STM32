@@ -14064,6 +14064,7 @@ extern SystemState_t g_SystemState;
 void Start_ADC_DMA(void);
 void Stop_ADC_DMA(void);
 void FFT_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
+void Calc_Noice_Energy(Wave_Struct* P_Wave);
 void Send_Wave(Wave_Struct* P_Wave);
 void USART_Task(Wave_Struct* Wave_ori,Wave_Struct* noise);
 # 31 "../MyDrive/bsp_system.h" 2
@@ -14104,6 +14105,7 @@ max_3_index Top3_Mix;
 
 Wave_Struct Wave_origin;
 Wave_Struct Wave_noise;
+
 SystemState_t g_SystemState;
 
 
@@ -14128,16 +14130,21 @@ void App_process(void)
 
     FFT_Task(&Wave_origin,&Wave_noise);
 
+  Calc_Noice_Energy(&Wave_noise);
+
     Send_Wave(&Wave_origin);
+
     USART_Task(&Wave_origin,&Wave_noise);
 
     if (g_SystemState == SYS_STATE_SINGLE_SHOT) {
         HMI_send_string("tm0.en","1");
         g_SystemState = SYS_STATE_IDLE;
     }
+
     else if (g_SystemState == SYS_STATE_CONTINUOUS) {
         Start_ADC_DMA();
     }
+
 }
 
 

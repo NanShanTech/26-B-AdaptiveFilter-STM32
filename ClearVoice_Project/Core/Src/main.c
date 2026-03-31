@@ -66,6 +66,7 @@ max_3_index Top3_Mix;//
 
 Wave_Struct Wave_origin;
 Wave_Struct Wave_noise;
+
 SystemState_t g_SystemState;
 
 /* USER CODE END PV */

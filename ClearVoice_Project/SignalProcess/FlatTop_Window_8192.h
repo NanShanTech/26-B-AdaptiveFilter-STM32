@@ -1,9 +1,3 @@
-/* 
- * 自动生成窗函数数组
- * 类型: Flat Top (平顶窗 - 幅值测量最准)
- * 点数: 8192 
- */
-
 #ifndef _FLATTOP_WINDOW_8192_H_
 #define _FLATTOP_WINDOW_8192_H_
 
