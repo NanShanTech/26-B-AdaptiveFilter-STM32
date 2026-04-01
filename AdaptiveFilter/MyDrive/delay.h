@@ -1,6 +1,6 @@
 #ifndef __DELAY_H
 #define __DELAY_H
-#include "bsp_system.h"
+#include "global_types.h"
 void delay_us(uint32_t udelay);
 void delay_ms(uint32_t t);
 #endif

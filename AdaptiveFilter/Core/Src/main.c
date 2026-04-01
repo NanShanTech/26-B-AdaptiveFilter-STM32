@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "bsp_system.h"
+#include "global_types.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,7 +55,7 @@ uint8_t dma_finish;
 
 __attribute__((section (".AXI_SRAM")))  uint16_t adc1_buffer[FFT_N+4] ;//混合信号，由AD9220采集，前四个数据舍弃
 
-__attribute__((section (".AXI_SRAM")))  uint16_t adc2_buffer[1024] ;//干扰信号（前级已过AD637处理）
+__attribute__((section (".AXI_SRAM")))  uint16_t adc2_buffer[128] ;//干扰信号（前级已过AD637处理）
 
 __attribute__((section (".AXI_SRAM"))) fftin FFTIN_Mix;//
 
@@ -80,7 +81,8 @@ static void MPU_Config(void);
 void App_process(void)
 {   
     
-    if (dma_finish == 0) {
+    if (dma_finish == 0) 
+    {
         return;
     }
     dma_finish = 0;
@@ -146,7 +148,8 @@ int main(void)
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
   //  HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)aRxBuffer, RXBUFFERSIZE);
-   AD9220_Init(adc1_buffer, FFT_N+4);
+	 HAL_ADC_Start_DMA(&hadc2,(uint32_t*)&adc2_buffer,128);
+	 HAL_TIM_Base_Start(&htim3);
    AD9220_Start_DMA(adc1_buffer, FFT_N+4);
 	 Init_AD9910();
 	 AD9910_FreWrite(300);//原始信号300hz
@@ -251,7 +254,9 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void AD9220_ConvCpltCallback() {
+    dma_finish = 1; // 设置 DMA 完成标志
+}
 
 // void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 // {

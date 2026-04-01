@@ -5,7 +5,7 @@
 #ifndef PROJECT_FREQANA_H
 #define PROJECT_FREQANA_H
 
-#Include "bsp_system.h"
+#include "global_types.h"
 
 #define FFT_N 8192//采样点数
 #define FFT_2N 16384
@@ -60,7 +60,7 @@ float32_t Find_Vpp(fftin *input);//时域vpp提取（滑动窗口法）
 
 WaveType_t Rec_wavetype(fftdata *freqin, uint16_t idx);//波形识别
 
-float32_t Get_AC_RMS(uint16_t *pData, uint16_t len) ;//计算交流有效值（去直流分量）
+float32_t Get_AC_RMS(uint16_t *pData, uint16_t len) ;
 
 
 #endif //PROJECT_FREQANA_H

@@ -1,11 +1,10 @@
-//
-// Created by 47306 on 2026/3/11.
-//
+
 
 #ifndef H743_HAL_FREQANA_H
 #define H743_HAL_FREQANA_H
 
-#include "bsp_system.h"
+#include "global_types.h"
+#include "fftana.h"
 
 void Freq_Analysis_Split(fftdata *freqin, max_3_index *max_3, float32_t rms_b, Analysis_Result_t *result) ;
 

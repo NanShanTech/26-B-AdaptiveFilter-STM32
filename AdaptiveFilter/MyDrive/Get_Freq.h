@@ -1,7 +1,7 @@
 #ifndef __FREQUENCY_MEASURE_H
 #define __FREQUENCY_MEASURE_H
 
-#include "bsp_system.h"
+#include "global_types.h"
 
 
 

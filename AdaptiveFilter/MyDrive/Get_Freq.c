@@ -1,4 +1,4 @@
-#include "Get_Freq.h"
+#include "bsp_system.h"
 
 static FreqControl_t FreqCtrl = {0};
 

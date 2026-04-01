@@ -1,8 +1,4 @@
-#include "main.h"
-#include "AD9910.h"
-#include "sys.h"
-#include <stdio.h>
-#include <string.h>
+#include "bsp_system.h"
 
 #define delay_ms(x) HAL_Delay(x)
 const uchar cfr1[] = {0x00, 0x40, 0x00, 0x00};

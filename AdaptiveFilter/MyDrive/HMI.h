@@ -1,7 +1,7 @@
 #ifndef __HMI_H
 #define __HMI_H
 
-#include "bsp_system.h"
+#include "global_types.h"
 
 void HMI_send_string(char* name, char* showdata);     // 向屏幕指定控件发送字符串
 void HMI_send_number(char* name, int num);            // 向屏幕指定控件发送整数

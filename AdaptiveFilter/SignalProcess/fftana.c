@@ -1,11 +1,5 @@
-//
-// Created by h3_Saki on 2025/10/28.
-//
-#include "fftana.h"
-#include "arm_const_structs_extra.h"
-#include "arm_math.h"
-#include "extra_ffts.h"
-#include <stdint.h>
+
+#include "bsp_system.h"
 
 void process_data(const uint16_t *data_ori, fftin *data_processed) {
     float32_t dc_offset = 0.0f;
@@ -298,16 +292,9 @@ float32_t Get_AC_RMS(uint16_t *pData, uint16_t len) {
 
     float32_t voltage_scale = 3.3f / 4095.0f;
     float32_t sum_voltage = 0.0f;
-    float32_t dc_offset = 0.0f;
-    
-    for (uint16_t i = 0; i < len; i++) {
-        sum_voltage += (float32_t)pData[i] * voltage_scale;
-    }
-    dc_offset = sum_voltage / (float32_t)len;
-
     float32_t sum_sq = 0.0f;
     for (uint16_t i = 0; i < len; i++) {
-        float32_t ac_voltage = ((float32_t)pData[i] * voltage_scale) - dc_offset;
+        float32_t ac_voltage = ((float32_t)pData[i] * voltage_scale) ;
         sum_sq += ac_voltage * ac_voltage;
     }
     return sqrtf(sum_sq / (float32_t)len);

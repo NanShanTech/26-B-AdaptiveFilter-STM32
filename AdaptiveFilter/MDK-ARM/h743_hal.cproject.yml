@@ -126,6 +126,7 @@ project:
         - file: ../SignalProcess/fftana.h
         - file: ../SignalProcess/SignalSeperation.c
         - file: ../SignalProcess/SignalSeperation.h
+        - file: ../SignalProcess/FlatTop_Window_8192.h
     - group: MyDrive
       files:
         - file: ../MyDrive/AD9910.c
@@ -140,6 +141,7 @@ project:
         - file: ../MyDrive/delay.c
         - file: ../MyDrive/ad9220.c
         - file: ../MyDrive/ad9220.h
+        - file: ../MyDrive/global_types.h
     - group: long_fft
       files:
         - file: ../SignalProcess/long_fft/arm_bitreversal2_extra.c

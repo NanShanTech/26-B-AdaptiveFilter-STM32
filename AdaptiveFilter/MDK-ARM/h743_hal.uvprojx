@@ -660,6 +660,11 @@
               <FileType>5</FileType>
               <FilePath>..\MyDrive\ad9220.h</FilePath>
             </File>
+            <File>
+              <FileName>global_types.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\MyDrive\global_types.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

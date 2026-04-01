@@ -42,13 +42,10 @@
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\string.h \
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\float.h ../Core/Inc\adc.h \
   ../Core/Inc\dma.h ../Core/Inc\tim.h ../Core/Inc\usart.h \
-  ../Core/Inc\gpio.h ../MyDrive\bsp_system.h \
-  ../Drivers/CMSIS/DSP/Include\arm_const_structs.h \
-  ../Drivers/CMSIS/DSP/Include/arm_common_tables.h \
-  D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdarg.h \
+  ../Core/Inc\gpio.h ../MyDrive\bsp_system.h ../MyDrive/global_types.h \
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdio.h \
   D:\Keil_v5\ARM\ARMCLANG\Bin\..\include\stdlib.h ../MyDrive/delay.h \
-  ../MyDrive/bsp_system.h ../MyDrive/AD9910.h ../MyDrive/AD9959.h \
-  ../MyDrive/HMI.h ../MyDrive/sys.h ../MyDrive/Get_Freq.h \
-  ../Tasks\Tasks.h ../MyDrive/ad9220.h ../SignalProcess\fftana.h \
-  ../SignalProcess\SignalSeperation.h
+  ../MyDrive/bsp_system.h ../MyDrive/AD9910.h ../MyDrive/HMI.h \
+  ../MyDrive/sys.h ../MyDrive/Get_Freq.h ../SignalProcess\fftana.h \
+  ../SignalProcess\SignalSeperation.h ../MyDrive/ad9220.h \
+  ../Tasks\Tasks.h

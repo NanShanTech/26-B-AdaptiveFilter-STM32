@@ -246,6 +246,8 @@ build:
           category: sourceC
         - file: ../../../../SignalProcess/SignalSeperation.h
           category: header
+        - file: ../../../../SignalProcess/FlatTop_Window_8192.h
+          category: header
     - group: MyDrive
       files:
         - file: ../../../../MyDrive/AD9910.c
@@ -271,6 +273,8 @@ build:
         - file: ../../../../MyDrive/ad9220.c
           category: sourceC
         - file: ../../../../MyDrive/ad9220.h
+          category: header
+        - file: ../../../../MyDrive/global_types.h
           category: header
     - group: long_fft
       files:
