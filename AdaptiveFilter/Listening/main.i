@@ -14168,6 +14168,8 @@ float32_t Find_Vpp(fftin *input);
 WaveType_t Rec_wavetype(fftdata *freqin, uint16_t idx);
 
 float32_t Get_AC_RMS(uint16_t *pData, uint16_t len) ;
+
+float32_t Max_Harmonic_Find(float32_t* Input, uint16_t Base_Index, uint8_t Harmonic_N);
 # 37 "../MyDrive\\bsp_system.h" 2
 
 # 1 "../SignalProcess\\SignalSeperation.h" 1

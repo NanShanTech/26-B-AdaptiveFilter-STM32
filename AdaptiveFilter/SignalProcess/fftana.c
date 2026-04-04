@@ -299,3 +299,33 @@ float32_t Get_AC_RMS(uint16_t *pData, uint16_t len) {
     }
     return sqrtf(sum_sq / (float32_t)len);
 }
+
+float32_t Max_Harmonic_Find(float32_t* Input, uint16_t Base_Index, uint8_t Harmonic_N) {
+    
+	uint32_t target = (uint32_t)Base_Index * Harmonic_N;
+    
+    if (target >= FFT_N_2) {
+        return 0.0f;
+    }
+
+    float32_t max_val = 0.0f;
+    
+    // 3. 定义搜索邻域：通常取 +/- 2 或 +/- 3 个频点
+    // 因为不加窗的矩形窗主瓣较窄，+/- 2 足够覆盖能量集中的区域
+    int8_t search_range = 2; 
+
+    for (int8_t offset = -search_range; offset <= search_range; offset++) {
+        int32_t current_idx = (int32_t)target + offset;
+        
+        // 4. 确保搜索索引不越界 (不能小于0，不能超过 FFT_N_2)
+        if (current_idx > 0 && current_idx < FFT_N_2) {
+            if (Input[current_idx] > max_val) {
+                max_val = Input[current_idx];
+            }
+        }
+    }
+
+    return max_val;
+}
+
+

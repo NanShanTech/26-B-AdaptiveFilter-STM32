@@ -62,5 +62,7 @@ WaveType_t Rec_wavetype(fftdata *freqin, uint16_t idx);//波形识别
 
 float32_t Get_AC_RMS(uint16_t *pData, uint16_t len) ;
 
+float32_t Max_Harmonic_Find(float32_t* Input, uint16_t Base_Index, uint8_t Harmonic_N);
+
 
 #endif //PROJECT_FREQANA_H

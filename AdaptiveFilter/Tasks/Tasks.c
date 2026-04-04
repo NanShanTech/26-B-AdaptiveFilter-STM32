@@ -22,8 +22,6 @@ void FFT_Task(Analysis_Result_t *output)
     memset(adc1_buffer, 0, sizeof(adc1_buffer));
 }
 
-
-
 void Send_Wave(Analysis_Result_t *output) 
 {
    AD9910_FreWrite(output->Original.Freq);
