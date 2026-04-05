@@ -14196,7 +14196,7 @@ float32_t Get_Total_RMS(uint16_t *pData, uint16_t len);
 
 void AD9220_Start_DMA(uint16_t *adc_buffer, uint32_t buffer_length);
 void AD9220_Stop_DMA(void);
-void process_data_ad9220(const uint16_t *data_ori, fftin *data_processed);
+void process_data_decay(const uint16_t *data_ori, fftin *data_processed) ;
 float32_t Get_Total_RMS_AD9220(uint16_t *pData, uint16_t len);
 void AD9220_ConvCpltCallback(void);
 # 39 "../MyDrive\\bsp_system.h" 2
@@ -14250,25 +14250,19 @@ void Freq_Analysis_Split(fftdata *freqin, max_3_index *max_3, fftdata *wave_inte
     if (abs((int32_t)idx1 - (int32_t)pure_idx_B) <= 2) {
         idx_B = idx1;
         idx_A = idx2;
-    } else {
+    }
+  else
+   {
         idx_B = idx2;
         idx_A = idx1;
     }
 
-
     result->Original.Freq = idx_A * 5;
     result->Interfere.Freq = idx_B * 5;
 
-
-
     result->Original.Wave_type = WAVE_SINE;
 
-
     result->Interfere.Wave_type = Rec_wavetype(wave_inter, pure_idx_B);
-
-
-
-
 
     float32_t Mag_A = Max_Harmonic_Find(freqin->mag, idx_A, 1);
     result->Original.Vpp = Mag_A / 2048.0f;

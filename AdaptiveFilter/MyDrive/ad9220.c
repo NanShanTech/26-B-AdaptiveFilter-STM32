@@ -57,25 +57,20 @@ void AD9220_Stop_DMA(void)
 }
 
 /* 数据处理函数 */
-void process_data_ad9220(const uint16_t *data_ori, fftin *data_processed) 
+void process_data_decay(const uint16_t *data_ori, fftin *data_processed) 
 {
-
-    const float32_t voltage_scale = 10.0f / 4096.0f; 
-    float32_t sum = 0.0f;
-    float32_t dc_offset_raw = 0.0f;
+	
+    float32_t dc_offset = 0.0f;
+    float32_t voltage_scale = 3.3f / 4095.0f*2.0f;
     
+    float32_t sum = 0;
     for (uint32_t i = 0; i < FFT_N; i++) {
-
-        sum += (float32_t)(data_ori[i + 4] & 0x0FFF); 
+        sum += (float32_t)data_ori[i];
     }
-    dc_offset_raw = sum / (float32_t)FFT_N;
-
+    dc_offset = sum / (float32_t)FFT_N;
     for (uint32_t i = 0; i < FFT_N; i++) {
-
-        float32_t raw_centered = (float32_t)(data_ori[i + 4] & 0x0FFF) - dc_offset_raw;
-
-        data_processed->cmp[2 * i] = raw_centered * voltage_scale;   
-        data_processed->cmp[2 * i + 1] = 0.0f; // 虚部置零
+        data_processed->cmp[2 * i] = ((float32_t)data_ori[i] - dc_offset) * voltage_scale;
+        data_processed->cmp[2 * i + 1] = 0.0f;
     }
 }
 

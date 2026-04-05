@@ -16,26 +16,20 @@ void Freq_Analysis_Split(fftdata *freqin, max_3_index *max_3, fftdata *wave_inte
     if (abs((int32_t)idx1 - (int32_t)pure_idx_B) <= 2) {
         idx_B = idx1;  // idx1 匹配上了干扰源，它是干扰信号 B
         idx_A = idx2;  // 剩下的 idx2 就是有用信号 A
-    } else {
+    } 
+		else 
+			{
         idx_B = idx2;  // idx2 匹配上了干扰源
         idx_A = idx1;  // idx1 是有用信号 A
     }
 
-    // 4. 写入频率信息 (分辨率 5Hz)
     result->Original.Freq = idx_A * 5;
     result->Interfere.Freq = idx_B * 5;
 
-    // 5. 波形类型识别
-    // 有用信号 A 默认是纯正弦波
     result->Original.Wave_type = WAVE_SINE;
     
-    // 干扰信号 B 的波形类型识别
     result->Interfere.Wave_type = Rec_wavetype(wave_inter, pure_idx_B);
 
-    // ---------------------------------------------------------
-    // 6. 从幅度谱读取幅值并计算 Vpp
-    // ---------------------------------------------------------
-    // A. 计算有用信号 A 的 Vpp (基于混合信号频谱 freqin)
     float32_t Mag_A = Max_Harmonic_Find(freqin->mag, idx_A, 1); 
     result->Original.Vpp = Mag_A / 2048.0f; // 正弦波直接转换 (8192点)
 

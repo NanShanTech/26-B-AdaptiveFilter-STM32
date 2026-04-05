@@ -14197,7 +14197,7 @@ float32_t Get_Total_RMS(uint16_t *pData, uint16_t len);
 
 void AD9220_Start_DMA(uint16_t *adc_buffer, uint32_t buffer_length);
 void AD9220_Stop_DMA(void);
-void process_data_ad9220(const uint16_t *data_ori, fftin *data_processed);
+void process_data_decay(const uint16_t *data_ori, fftin *data_processed) ;
 float32_t Get_Total_RMS_AD9220(uint16_t *pData, uint16_t len);
 void AD9220_ConvCpltCallback(void);
 # 39 "../MyDrive\\bsp_system.h" 2
@@ -14239,14 +14239,14 @@ void USART_Task(Analysis_Result_t *output);
 void FFT_Task(Analysis_Result_t *output)
 {
 
-    process_data_ad9220(adc1_buffer, &FFTIN_Mix);
+    process_data_decay(adc1_buffer, &FFTIN_Mix);
     process_data(adc2_buffer, &FFTIN_Inter);
     output->Interfere.Vpp = Find_Vpp(&FFTIN_Inter);
 
     fft_process(&FFTIN_Mix, &FFTOUT_Mix);
     fft_process(&FFTIN_Inter, &FFTOUT_Inter);
 
-    regurlize_mag(&FFTOUT_Inter,1);
+    regurlize_mag(&FFTOUT_Mix,1);
 
     get_max_3(&FFTOUT_Mix, &Top3_Mix);
     get_max_3(&FFTOUT_Inter, &Top3_Inter);

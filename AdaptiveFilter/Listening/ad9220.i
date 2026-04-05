@@ -14197,7 +14197,7 @@ float32_t Get_Total_RMS(uint16_t *pData, uint16_t len);
 
 void AD9220_Start_DMA(uint16_t *adc_buffer, uint32_t buffer_length);
 void AD9220_Stop_DMA(void);
-void process_data_ad9220(const uint16_t *data_ori, fftin *data_processed);
+void process_data_decay(const uint16_t *data_ori, fftin *data_processed) ;
 float32_t Get_Total_RMS_AD9220(uint16_t *pData, uint16_t len);
 void AD9220_ConvCpltCallback(void);
 # 39 "../MyDrive/bsp_system.h" 2
@@ -14291,24 +14291,19 @@ void AD9220_Stop_DMA(void)
 }
 
 
-void process_data_ad9220(const uint16_t *data_ori, fftin *data_processed)
+void process_data_decay(const uint16_t *data_ori, fftin *data_processed)
 {
 
-    const float32_t voltage_scale = 10.0f / 4096.0f;
-    float32_t sum = 0.0f;
-    float32_t dc_offset_raw = 0.0f;
+    float32_t dc_offset = 0.0f;
+    float32_t voltage_scale = 3.3f / 4095.0f*2.0f;
 
+    float32_t sum = 0;
     for (uint32_t i = 0; i < 8192; i++) {
-
-        sum += (float32_t)(data_ori[i + 4] & 0x0FFF);
+        sum += (float32_t)data_ori[i];
     }
-    dc_offset_raw = sum / (float32_t)8192;
-
+    dc_offset = sum / (float32_t)8192;
     for (uint32_t i = 0; i < 8192; i++) {
-
-        float32_t raw_centered = (float32_t)(data_ori[i + 4] & 0x0FFF) - dc_offset_raw;
-
-        data_processed->cmp[2 * i] = raw_centered * voltage_scale;
+        data_processed->cmp[2 * i] = ((float32_t)data_ori[i] - dc_offset) * voltage_scale;
         data_processed->cmp[2 * i + 1] = 0.0f;
     }
 }

@@ -5,14 +5,14 @@
 void FFT_Task(Analysis_Result_t *output)
 {
     // 1. 数据预处理：将 ADC 原始数据转为输入 FFT 的复数数组
-    process_data_ad9220(adc1_buffer, &FFTIN_Mix); 
+    process_data_decay(adc1_buffer, &FFTIN_Mix); //混合信号过了衰减器，需要放大
     process_data(adc2_buffer, &FFTIN_Inter);
     output->Interfere.Vpp = Find_Vpp(&FFTIN_Inter);
     // 2. 执行 FFT 运算
     fft_process(&FFTIN_Mix, &FFTOUT_Mix);   
     fft_process(&FFTIN_Inter, &FFTOUT_Inter);
 	
-    regurlize_mag(&FFTOUT_Inter,1);
+    regurlize_mag(&FFTOUT_Mix,1);
     // 3. 寻找频谱中的前三个最大峰值频点
     get_max_3(&FFTOUT_Mix, &Top3_Mix);      
     get_max_3(&FFTOUT_Inter, &Top3_Inter);

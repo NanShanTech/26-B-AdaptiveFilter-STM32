@@ -14196,7 +14196,7 @@ float32_t Get_Total_RMS(uint16_t *pData, uint16_t len);
 
 void AD9220_Start_DMA(uint16_t *adc_buffer, uint32_t buffer_length);
 void AD9220_Stop_DMA(void);
-void process_data_ad9220(const uint16_t *data_ori, fftin *data_processed);
+void process_data_decay(const uint16_t *data_ori, fftin *data_processed) ;
 float32_t Get_Total_RMS_AD9220(uint16_t *pData, uint16_t len);
 void AD9220_ConvCpltCallback(void);
 # 39 "../MyDrive\\bsp_system.h" 2
@@ -14236,7 +14236,7 @@ void USART_Task(Analysis_Result_t *output);
 char aRxBuffer[500];
 uint16_t RX_len;
 
-volatile uint8_t dma_finish_ad9220 = 0;
+volatile uint8_t dma_finish_adc1 = 0;
 volatile uint8_t dma_finish_adc2 = 0;
 __attribute__((section (".AXI_SRAM"))) uint16_t adc1_buffer[8192 +4] ;
 
@@ -14265,18 +14265,25 @@ static void MPU_Config(void);
 
 void App_process(void)
 {
-    if (dma_finish_ad9220 == 0||dma_finish_adc2==0)return;
-    dma_finish_ad9220 = 0;
+    if (dma_finish_adc1==0)return;
+    dma_finish_adc1 = 0;
     dma_finish_adc2=0;
-    AD9220_Stop_DMA();
-    HAL_ADC_Stop_DMA(&hadc2);
+
+   HAL_TIM_Base_Stop(&htim3);
+  HAL_ADC_Stop_DMA(&hadc1);
+   HAL_ADC_Stop_DMA(&hadc2);
+
    SCB_InvalidateDCache_by_Addr((uint32_t *)adc1_buffer, sizeof(adc1_buffer));
    SCB_InvalidateDCache_by_Addr((uint32_t *)adc2_buffer, sizeof(adc2_buffer));
+
     FFT_Task(&output);
+
     Send_Wave(&output);
     USART_Task(&output);
-    AD9220_Start_DMA(adc1_buffer, 8192 +4);
-   HAL_ADC_Start_DMA(&hadc2,(uint32_t*)&adc2_buffer,8192);
+
+
+  HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&adc1_buffer,8192);
+  HAL_TIM_Base_Start(&htim3);
 
 }
 
@@ -14333,9 +14340,10 @@ int main(void)
   MX_ADC2_Init();
 
 
-  HAL_ADC_Start_DMA(&hadc2,(uint32_t*)&adc2_buffer,8192);
+
+  HAL_ADC_Start_DMA(&hadc1,(uint32_t*)&adc1_buffer,8192);
   HAL_TIM_Base_Start(&htim3);
-   AD9220_Start_DMA(adc1_buffer, 8192 +4);
+
   Init_AD9910();
   AD9910_FreWrite(300);
   AD9910_AmpWrite(15000);
@@ -14440,13 +14448,14 @@ void PeriphCommonClock_Config(void)
 
 
 
-void AD9220_ConvCpltCallback() {
-    dma_finish_ad9220 = 1;
-}
-
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
-     if (hadc->Instance == ((ADC_TypeDef *) (((0x40000000UL) + 0x00020000UL) + 0x2100UL)))
+      if (hadc->Instance == ((ADC_TypeDef *) (((0x40000000UL) + 0x00020000UL) + 0x2000UL)))
+    {
+        dma_finish_adc1 = 1;
+    }
+
+      if (hadc->Instance == ((ADC_TypeDef *) (((0x40000000UL) + 0x00020000UL) + 0x2100UL)))
     {
         dma_finish_adc2 = 1;
     }
